@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file, Response
 from flask_cors import CORS
 import base64
 from io import BytesIO
@@ -6,6 +6,10 @@ from PIL import Image
 import numpy as np
 from fer import FER
 from ytmusicapi import YTMusic
+from yt_dlp import YoutubeDL
+import tempfile
+import os
+import threading
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +17,10 @@ CORS(app)
 # Initialize FER and YTMusic
 detector = FER(mtcnn=True)
 yt = YTMusic()
+
+# Cache dictionary to store {video_id: filepath}
+audio_cache = {}
+cache_lock = threading.Lock()
 
 # Default fallback YouTube video links (used when API fails)
 default_songs = {
@@ -29,6 +37,50 @@ default_songs = {
         {"title": "Ilahi", "artist": "Arijit Singh", "url": "https://www.youtube.com/watch?v=JrHno2s33Mw"},
     ]
 }
+
+def extract_video_id(url):
+    # Basic extraction of video ID from YouTube URL
+    if "v=" in url:
+        return url.split("v=")[1].split("&")[0]
+    return None
+
+def download_audio(url):
+    video_id = extract_video_id(url)
+    if not video_id:
+        return None
+
+    with cache_lock:
+        if video_id in audio_cache and os.path.exists(audio_cache[video_id]):
+            # Cached file exists, return path
+            return audio_cache[video_id]
+
+    # Download audio and cache
+    temp_dir = tempfile.mkdtemp(prefix="moodify_")
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': os.path.join(temp_dir, '%(id)s.%(ext)s'),
+        'quiet': True,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'noplaylist': True,
+    }
+
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info)
+            mp3_file = os.path.splitext(filename)[0] + ".mp3"
+
+        with cache_lock:
+            audio_cache[video_id] = mp3_file
+
+        return mp3_file
+    except Exception as e:
+        print(f"[ERROR] yt_dlp download failed for {url}: {e}")
+        return None
 
 
 @app.route('/')
@@ -92,6 +144,23 @@ def recommend():
         songs = default_songs.get(mood, default_songs['neutral'])
 
     return jsonify({"songs": songs})
+
+
+@app.route('/audio', methods=['POST'])
+def fetch_audio():
+    data = request.get_json()
+    url = data.get('url')
+
+    if not url or not url.startswith("https://www.youtube.com"):
+        return jsonify({"error": "Invalid YouTube URL"}), 400
+
+    mp3_path = download_audio(url)
+
+    if not mp3_path or not os.path.exists(mp3_path):
+        return jsonify({"error": "Audio fetch failed"}), 500
+
+    # Stream the mp3 file as response
+    return send_file(mp3_path, mimetype="audio/mpeg")
 
 
 if __name__ == '__main__':

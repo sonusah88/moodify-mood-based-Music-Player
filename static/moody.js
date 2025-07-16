@@ -1,4 +1,8 @@
-// Elements
+// === CONFIG ===
+// Always use local audio streaming via backend + yt_dlp
+const useYouTubePlayer = false;  // MUST be false for local audio streaming
+
+// === ELEMENTS ===
 const detectMoodBtn = document.querySelector('.detect-mood-btn');
 const emojiElement = document.querySelector('.emoji');
 const moodTextElement = document.querySelector('.mood-text');
@@ -7,53 +11,41 @@ const playPauseBtn = document.querySelector('.play-pause-btn');
 const nextBtn = document.querySelector('.fa-step-forward');
 const prevBtn = document.querySelector('.fa-step-backward');
 
-let player;
+const audioElement = document.getElementById('global-player');
+
 let playlist = [];
 let currentIndex = 0;
-let isPlayerReady = false;
+let isPlaying = false;
 
-// Called by YouTube IFrame API
-function onYouTubeIframeAPIReady() {
-  console.log("🎥 YouTube IFrame API is ready");
-  player = new YT.Player('youtube-player', {
-    height: '0', // Hide player (audio only)
-    width: '0',
-    events: {
-      'onReady': onPlayerReady,
-      'onStateChange': onPlayerStateChange
-    }
-  });
-}
-
-function onPlayerReady() {
-  isPlayerReady = true;
-  console.log("✅ YouTube player is ready");
-  if (playlist.length > 0) {
-    playSong(currentIndex);
-  }
-}
-
-function onPlayerStateChange(event) {
-  if (event.data === YT.PlayerState.ENDED) {
-    nextSong();
-  }
-}
-
+// === PLAYBACK FUNCTIONS ===
 function playSong(index) {
-  if (!player || !isPlayerReady || playlist.length === 0) return;
-
+  if (playlist.length === 0) return;
   currentIndex = index;
-  const videoId = extractVideoId(playlist[currentIndex].url);
 
-  console.log(`🎶 Playing: ${playlist[currentIndex].title}, ID: ${videoId}`);
+  const song = playlist[currentIndex];
+  console.log(`🎧 Playing local audio: ${song.title}`);
 
-  if (videoId) {
-    player.loadVideoById(videoId);
-    updateSongInfoUI(playlist[currentIndex]);
-    updatePlayPauseIcon(true);
-  } else {
-    console.error("❌ Invalid YouTube URL:", playlist[currentIndex].url);
-  }
+  fetch('/audio', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: song.url })
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to fetch audio from backend");
+      return res.blob();
+    })
+    .then(blob => {
+      const audioUrl = URL.createObjectURL(blob);
+      audioElement.src = audioUrl;
+      audioElement.play();
+      updateSongInfoUI(song);
+      updatePlayPauseIcon(true);
+      isPlaying = true;
+    })
+    .catch(err => {
+      console.error("❌ Error playing local audio:", err);
+      alert("Could not play this audio.");
+    });
 }
 
 function nextSong() {
@@ -66,29 +58,14 @@ function prevSong() {
   playSong(currentIndex);
 }
 
-function extractVideoId(url) {
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes("youtu.be")) {
-      return parsed.pathname.slice(1);
-    }
-    if (parsed.hostname.includes("youtube.com") && parsed.searchParams.has("v")) {
-      return parsed.searchParams.get("v");
-    }
-  } catch (e) {
-    console.error("❌ Invalid video URL:", url);
-  }
-  return null;
-}
-
 function updateSongInfoUI(song) {
   document.querySelector('footer .song-title').textContent = song.title;
   document.querySelector('footer .song-artist').textContent = song.artist;
 }
 
-function updatePlayPauseIcon(isPlaying) {
+function updatePlayPauseIcon(playing) {
   const icon = playPauseBtn.querySelector('i');
-  if (isPlaying) {
+  if (playing) {
     icon.classList.remove('fa-play');
     icon.classList.add('fa-pause');
   } else {
@@ -97,25 +74,48 @@ function updatePlayPauseIcon(isPlaying) {
   }
 }
 
+// === PLAY/PAUSE BUTTON ===
+playPauseBtn.addEventListener('click', () => {
+  if (audioElement.paused) {
+    audioElement.play();
+    updatePlayPauseIcon(true);
+    isPlaying = true;
+  } else {
+    audioElement.pause();
+    updatePlayPauseIcon(false);
+    isPlaying = false;
+  }
+});
+
+// === NEXT / PREV BUTTONS ===
+nextBtn.addEventListener('click', nextSong);
+prevBtn.addEventListener('click', prevSong);
+
+// === AUTO NEXT for local audio ===
+audioElement.addEventListener('ended', () => {
+  nextSong();
+});
+
+// === RECOMMENDATION & UI ===
 async function fetchPlaylist(mood) {
-  const res = await fetch('/recommend', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ mood })
-  });
+  try {
+    const res = await fetch('/recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mood })
+    });
 
-  const data = await res.json();
-  playlist = data.songs || [];
+    const data = await res.json();
+    playlist = data.songs || [];
 
-  if (playlist.length > 0) {
-    updateRecommendedSongs();
-    if (isPlayerReady) {
+    if (playlist.length > 0) {
+      updateRecommendedSongs();
       playSong(0);
     } else {
-      console.log("⏳ Waiting for player to be ready...");
+      console.warn("⚠️ No songs received for mood:", mood);
     }
-  } else {
-    console.warn("⚠️ No songs received for mood:", mood);
+  } catch (err) {
+    console.error("❌ Error fetching playlist:", err);
   }
 }
 
@@ -144,7 +144,7 @@ function updateRecommendedSongs() {
   });
 }
 
-// Mood detection button
+// === MOOD DETECTION ===
 detectMoodBtn.addEventListener('click', async () => {
   const frame = captureFrame();
   try {
@@ -213,24 +213,7 @@ function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-// Play/pause button
-playPauseBtn.addEventListener('click', () => {
-  if (!player) return;
-  const state = player.getPlayerState();
-  if (state === YT.PlayerState.PLAYING) {
-    player.pauseVideo();
-    updatePlayPauseIcon(false);
-  } else {
-    player.playVideo();
-    updatePlayPauseIcon(true);
-  }
-});
-
-// Next/Prev
-nextBtn.addEventListener('click', () => nextSong());
-prevBtn.addEventListener('click', () => prevSong());
-
-// Start webcam on load
+// === START WEBCAM ===
 async function startWebcam() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
