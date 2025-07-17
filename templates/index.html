@@ -45,11 +45,33 @@
         </div>
       </header>
 
-      <!-- Webcam Stream Section -->
+      <!-- Enhanced Webcam Stream Section -->
       <section class="webcam-section" style="text-align: center; padding: 20px;">
-        <h2>Live Camera Feed</h2>
-        <video id="webcam" autoplay playsinline
-          style="width: 320px; height: 240px; border-radius: 10px; border: 2px solid #ccc;"></video>
+        <h2>Neural Mood Scanner</h2>
+        <div class="webcam-container">
+          <div class="neon-frame">
+            <video id="webcam" autoplay playsinline
+              style="width: 360px; height: 270px; border-radius: 12px;"></video>
+            <div class="scan-overlay">
+              <div class="scan-line"></div>
+              <div class="corner top-left"></div>
+              <div class="corner top-right"></div>
+              <div class="corner bottom-left"></div>
+              <div class="corner bottom-right"></div>
+            </div>
+            <div class="waveform-overlay">
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+              <div class="wave-bar"></div>
+            </div>
+          </div>
+          <div class="mood-indicator">
+            <span>Scanning Mood...</span>
+            <div class="pulse-dot"></div>
+          </div>
+        </div>
       </section>
 
       <div class="content-area" style="display: flex; gap: 20px;">
@@ -160,9 +182,6 @@
     </main>
   </div>
 
-  <!-- Hidden YouTube player div (not used in local audio mode but kept for fallback) -->
-  <div id="youtube-player" style="display:none;"></div>
-
   <!-- Music player footer -->
   <footer class="music-player">
     <div class="player-song-info">
@@ -197,13 +216,6 @@
     </div>
   </footer>
 
-  <!-- The actual audio element for playback -->
-  <audio id="global-player" controls style="width: 100%; position: fixed; bottom: 0; z-index: 100;"></audio>
-
-  <!-- YouTube iframe API (not used but included for fallback) -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-  
-  <!-- Your main JS file -->
   <script src="{{ url_for('static', filename='moody.js') }}" defer></script>
 </body>
 

@@ -1,87 +1,57 @@
-from flask import Flask, render_template, request, jsonify, send_file, Response
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import base64
 from io import BytesIO
 from PIL import Image
 import numpy as np
 from fer import FER
-from ytmusicapi import YTMusic
-from yt_dlp import YoutubeDL
-import tempfile
-import os
-import threading
+import requests
 
 app = Flask(__name__)
 CORS(app)
 
-# Initialize FER and YTMusic
+# Initialize FER detector
 detector = FER(mtcnn=True)
-yt = YTMusic()
 
-# Cache dictionary to store {video_id: filepath}
-audio_cache = {}
-cache_lock = threading.Lock()
-
-# Default fallback YouTube video links (used when API fails)
+# Default fallback songs with Deezer preview URLs (30 sec clips)
 default_songs = {
     "happy": [
-        {"title": "Apna Time Aayega", "artist": "Divine", "url": "https://www.youtube.com/watch?v=HhesaQXLuRY"},
-        {"title": "Ilahi", "artist": "Arijit Singh", "url": "https://www.youtube.com/watch?v=JrHno2s33Mw"},
+        {
+            "title": "Apna Time Aayega",
+            "artist": "Divine",
+            "url": "https://cdns-preview-6.dzcdn.net/stream/c-6b6ae12fda55e3a3d7e95d2acb834a68-3.mp3"
+        },
+        {
+            "title": "Ilahi",
+            "artist": "Arijit Singh",
+            "url": "https://cdns-preview-d.dzcdn.net/stream/c-d5ee9820f68c4ebf85a1ed28f19262e8-3.mp3"
+        }
     ],
     "sad": [
-        {"title": "Channa Mereya", "artist": "Arijit Singh", "url": "https://www.youtube.com/watch?v=284Ov7ysmfA"},
-        {"title": "Tujhe Bhula Diya", "artist": "Mohit Chauhan", "url": "https://www.youtube.com/watch?v=F1DrsR4IuOY"},
+        {
+            "title": "Channa Mereya",
+            "artist": "Arijit Singh",
+            "url": "https://cdns-preview-4.dzcdn.net/stream/c-4d1d084e411b0e8a9921c3f1c870d6dc-3.mp3"
+        },
+        {
+            "title": "Tujhe Bhula Diya",
+            "artist": "Mohit Chauhan",
+            "url": "https://cdns-preview-f.dzcdn.net/stream/c-fdd95a34ae6d50bcd5a70a3a869b0c92-3.mp3"
+        }
     ],
     "neutral": [
-        {"title": "Raabta", "artist": "Arijit Singh", "url": "https://www.youtube.com/watch?v=O8lRQDwMChw"},
-        {"title": "Ilahi", "artist": "Arijit Singh", "url": "https://www.youtube.com/watch?v=JrHno2s33Mw"},
+        {
+            "title": "Raabta",
+            "artist": "Arijit Singh",
+            "url": "https://cdns-preview-7.dzcdn.net/stream/c-7b04941d7a785dbb2f6a3b2439ef4f0a-3.mp3"
+        },
+        {
+            "title": "Ilahi",
+            "artist": "Arijit Singh",
+            "url": "https://cdns-preview-d.dzcdn.net/stream/c-d5ee9820f68c4ebf85a1ed28f19262e8-3.mp3"
+        }
     ]
 }
-
-def extract_video_id(url):
-    # Basic extraction of video ID from YouTube URL
-    if "v=" in url:
-        return url.split("v=")[1].split("&")[0]
-    return None
-
-def download_audio(url):
-    video_id = extract_video_id(url)
-    if not video_id:
-        return None
-
-    with cache_lock:
-        if video_id in audio_cache and os.path.exists(audio_cache[video_id]):
-            # Cached file exists, return path
-            return audio_cache[video_id]
-
-    # Download audio and cache
-    temp_dir = tempfile.mkdtemp(prefix="moodify_")
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': os.path.join(temp_dir, '%(id)s.%(ext)s'),
-        'quiet': True,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'noplaylist': True,
-    }
-
-    try:
-        with YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
-            mp3_file = os.path.splitext(filename)[0] + ".mp3"
-
-        with cache_lock:
-            audio_cache[video_id] = mp3_file
-
-        return mp3_file
-    except Exception as e:
-        print(f"[ERROR] yt_dlp download failed for {url}: {e}")
-        return None
-
 
 @app.route('/')
 def home():
@@ -122,45 +92,39 @@ def detect_mood():
 def recommend():
     data = request.get_json()
     mood = data.get("mood", "neutral")
+    query = f"{mood} hindi"
     songs = []
 
     try:
-        search_results = yt.search(f"{mood} hindi songs", filter="songs", limit=5)
+        # Deezer public search API
+        url = "https://api.deezer.com/search"
+        params = {"q": query, "limit": 10}
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        results = response.json().get('data', [])
 
-        for item in search_results:
+        for item in results:
+            # Use only songs with preview (30 sec clip)
+            preview_url = item.get('preview')
+            if not preview_url:
+                continue
             title = item.get('title', 'Unknown Title')
-            artist = ", ".join([a['name'] for a in item.get('artists', [])]) or "Unknown Artist"
-            video_id = item.get('videoId')
+            artist = item.get('artist', {}).get('name', 'Unknown Artist')
 
-            if video_id:
-                url = f"https://www.youtube.com/watch?v={video_id}"
-                songs.append({"title": title, "artist": artist, "url": url})
+            songs.append({
+                "title": title,
+                "artist": artist,
+                "url": preview_url
+            })
 
     except Exception as e:
-        print("[ERROR] YouTube API failed, falling back to default songs:", str(e))
+        print(f"[ERROR] Deezer API failed: {e}")
         songs = default_songs.get(mood, default_songs['neutral'])
 
     if not songs:
         songs = default_songs.get(mood, default_songs['neutral'])
 
     return jsonify({"songs": songs})
-
-
-@app.route('/audio', methods=['POST'])
-def fetch_audio():
-    data = request.get_json()
-    url = data.get('url')
-
-    if not url or not url.startswith("https://www.youtube.com"):
-        return jsonify({"error": "Invalid YouTube URL"}), 400
-
-    mp3_path = download_audio(url)
-
-    if not mp3_path or not os.path.exists(mp3_path):
-        return jsonify({"error": "Audio fetch failed"}), 500
-
-    # Stream the mp3 file as response
-    return send_file(mp3_path, mimetype="audio/mpeg")
 
 
 if __name__ == '__main__':
