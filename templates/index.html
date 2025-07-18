@@ -48,7 +48,7 @@
       <!-- Webcam Stream Section -->
       <section class="webcam-section" style="text-align: center; padding: 20px;">
         <h2>Live Camera Feed</h2>
-        <video id="webcam" autoplay playsinline
+        <video id="webcam" autoplay playsinline muted
           style="width: 320px; height: 240px; border-radius: 10px; border: 2px solid #ccc;"></video>
       </section>
 
@@ -160,9 +160,6 @@
     </main>
   </div>
 
-  <!-- Hidden YouTube player div (not used in local audio mode but kept for fallback) -->
-  <div id="youtube-player" style="display:none;"></div>
-
   <!-- Music player footer -->
   <footer class="music-player">
     <div class="player-song-info">
@@ -200,9 +197,6 @@
   <!-- The actual audio element for playback -->
   <audio id="global-player" controls style="width: 100%; position: fixed; bottom: 0; z-index: 100;"></audio>
 
-  <!-- YouTube iframe API (not used but included for fallback) -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-  
   <!-- Your main JS file -->
   <script src="{{ url_for('static', filename='moody.js') }}" defer></script>
 </body>
