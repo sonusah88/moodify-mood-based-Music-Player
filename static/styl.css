@@ -401,7 +401,9 @@ body {
   flex-grow: 1;
   animation: glowing-border 4s infinite alternate;
   max-height: 60vh;
+  max-width: 45%;
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .recommended-for-you h2 {

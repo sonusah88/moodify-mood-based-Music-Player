@@ -5,78 +5,35 @@ from io import BytesIO
 from PIL import Image
 import numpy as np
 from fer import FER
-import requests
 import random
+from ytmusicapi import YTMusic
+import yt_dlp
 
 # Initialize Flask
 app = Flask(__name__)
 CORS(app)
 
-# Initialize FER detector (mtcnn=False to avoid extra dependencies)
+# Initialize FER detector
 detector = FER()
 
-# Default fallback songs with Deezer preview URLs (30-sec clips)
-default_songs = {
-    "happy": [
-        {
-            "title": "Apna Time Aayega",
-            "artist": "Divine",
-            "url": "https://cdns-preview-6.dzcdn.net/stream/c-6b6ae12fda55e3a3d7e95d2acb834a68-3.mp3"
-        },
-        {
-            "title": "Ilahi",
-            "artist": "Arijit Singh",
-            "url": "https://cdns-preview-d.dzcdn.net/stream/c-d5ee9820f68c4ebf85a1ed28f19262e8-3.mp3"
-        }
-    ],
-    "sad": [
-        {
-            "title": "Channa Mereya",
-            "artist": "Arijit Singh",
-            "url": "https://cdns-preview-4.dzcdn.net/stream/c-4d1d084e411b0e8a9921c3f1c870d6dc-3.mp3"
-        },
-        {
-            "title": "Tujhe Bhula Diya",
-            "artist": "Mohit Chauhan",
-            "url": "https://cdns-preview-f.dzcdn.net/stream/c-fdd95a34ae6d50bcd5a70a3a869b0c92-3.mp3"
-        }
-    ],
-    "neutral": [
-        {
-            "title": "Raabta",
-            "artist": "Arijit Singh",
-            "url": "https://cdns-preview-7.dzcdn.net/stream/c-7b04941d7a785dbb2f6a3b2439ef4f0a-3.mp3"
-        },
-        {
-            "title": "Ilahi",
-            "artist": "Arijit Singh",
-            "url": "https://cdns-preview-d.dzcdn.net/stream/c-d5ee9820f68c4ebf85a1ed28f19262e8-3.mp3"
-        }
-    ]
-}
-
-# Static mood-to-song mapping for fallback random selection
-MOOD_SONGS = {
-    "happy": [
-        "https://deezer.com/track/12345",
-        "https://deezer.com/track/67890",
-        "https://deezer.com/track/11111",
-        "https://deezer.com/track/22222",
-        "https://deezer.com/track/33333"
-    ],
-    "sad": [
-        "https://deezer.com/track/44444",
-        "https://deezer.com/track/55555",
-        "https://deezer.com/track/66666"
-    ],
-    "neutral": [
-        "https://deezer.com/track/77777",
-        "https://deezer.com/track/88888"
-    ]
-}
+# Initialize YTMusic
+ytmusic = YTMusic()
 
 # Track already played songs to avoid repetition
-played_songs = {mood: [] for mood in MOOD_SONGS.keys()}
+played_songs = {"happy": [], "sad": [], "neutral": []}
+
+
+def get_audio_url(video_id):
+    """Fetch direct audio URL using yt_dlp."""
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'noplaylist': True,
+        'extract_flat': False
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
+        return info['url']
 
 
 @app.route('/')
@@ -121,59 +78,70 @@ def detect_mood():
 
 @app.route('/recommend', methods=['POST'])
 def recommend():
-    """Recommend random non-repeating songs based on detected mood."""
+    """Recommend mood-based Hindi songs using YTMusic with fallback mappings."""
     data = request.get_json()
     mood = data.get("mood", "neutral").lower()
-    query = f"{mood} hindi"
+
+    # Mood keyword mapping for better searches
+    mood_to_query = {
+        "happy": "latest happy hindi songs",
+        "sad": "sad hindi songs",
+        "neutral": "relaxing hindi songs",
+        "angry": "motivational hindi songs",
+        "fear": "calm soothing hindi songs",
+        "surprise": "party hindi songs"
+    }
+    query = mood_to_query.get(mood, "hindi songs")
+
     songs = []
-
     try:
-        # Deezer public search API
-        url = "https://api.deezer.com/search"
-        params = {"q": query, "limit": 20}  # Fetch 20 songs
-        response = requests.get(url, params=params, timeout=5)
-        response.raise_for_status()
-        results = response.json().get('data', [])
+        # Search for songs on YouTube Music
+        results = ytmusic.search(query, filter='songs', limit=10)
 
-        for item in results:
-            preview_url = item.get('preview')
-            if not preview_url:
+        for r in results:
+            if 'videoId' not in r:
                 continue
-            title = item.get('title', 'Unknown Title')
-            artist = item.get('artist', {}).get('name', 'Unknown Artist')
-
             songs.append({
-                "title": title,
-                "artist": artist,
-                "url": preview_url
+                "title": r['title'],
+                "artist": ', '.join([a['name'] for a in r['artists']]),
+                "videoId": r['videoId'],
+                "thumbnail": r['thumbnails'][0]['url']
             })
 
-        # Shuffle the songs
-        random.shuffle(songs)
-
-        # Filter already played
-        already_played = played_songs.get(mood, [])
-        songs = [s for s in songs if s['url'] not in already_played]
-
-        # Reset if all played
+        # Fallback check
         if not songs:
-            played_songs[mood] = []
-            songs = default_songs.get(mood, default_songs['neutral'])
+            # Default fallback to popular Hindi songs
+            results = ytmusic.search("top hindi songs", filter='songs', limit=10)
+            for r in results:
+                if 'videoId' in r:
+                    songs.append({
+                        "title": r['title'],
+                        "artist": ', '.join([a['name'] for a in r['artists']]),
+                        "videoId": r['videoId'],
+                        "thumbnail": r['thumbnails'][0]['url']
+                    })
 
-        # Select 5 random songs
+        # Randomly shuffle and pick top 5
+        random.shuffle(songs)
         selected_songs = songs[:5]
 
-        # Update played list
-        for s in selected_songs:
-            played_songs[mood].append(s['url'])
-
     except Exception as e:
-        print(f"[ERROR] Deezer API failed: {e}")
-        selected_songs = default_songs.get(mood, default_songs['neutral'])
+        print(f"[ERROR] YTMusic search failed: {e}")
+        selected_songs = []
 
     return jsonify({"songs": selected_songs})
 
 
+@app.route('/play/<video_id>')
+def play(video_id):
+    """Get direct audio URL of the selected song."""
+    try:
+        audio_url = get_audio_url(video_id)
+        return jsonify({"audio_url": audio_url})
+    except Exception as e:
+        print(f"[ERROR] yt_dlp failed: {e}")
+        return jsonify({"error": "Audio extraction failed"}), 500
+
+
 if __name__ == '__main__':
-    # Run with SSL for webcam (if needed): flask run --cert=adhoc
     app.run(debug=True)

@@ -27,23 +27,30 @@ let isShuffle = false;
 let isRepeat = false;
 
 // === PLAYBACK FUNCTIONS ===
-function playSong(index) {
+async function playSong(index) {
   if (!playlist.length) return;
   currentIndex = index;
   const song = playlist[currentIndex];
-  audioElement.src = song.url;
-  audioElement.currentTime = 0;
-  audioElement.play()
-    .then(() => {
+
+  try {
+    // Fetch the direct audio URL for the selected videoId
+    const res = await fetch(`/play/${song.videoId}`);
+    const data = await res.json();
+    if (data.audio_url) {
+      audioElement.src = data.audio_url;
+      audioElement.currentTime = 0;
+      await audioElement.play();
       updateSongInfoUI(song);
       updatePlayPauseIcon(true);
       isPlaying = true;
-    })
-    .catch(err => {
-      console.error("❌ Error playing audio:", err);
-      alert("Could not play this audio. Trying next song...");
-      nextSong();
-    });
+    } else {
+      throw new Error("Audio URL not found");
+    }
+  } catch (err) {
+    console.error("❌ Error playing audio:", err);
+    alert("Could not play this song. Trying the next one...");
+    nextSong();
+  }
 }
 
 function nextSong() {
@@ -74,7 +81,7 @@ function prevSong() {
 function updateSongInfoUI(song) {
   playerSongTitle.textContent = song.title || "Unknown Title";
   playerSongArtist.textContent = song.artist || "Unknown Artist";
-  playerAlbumArt.src = song.albumArt || "https://via.placeholder.com/50";
+  playerAlbumArt.src = song.thumbnail || "https://via.placeholder.com/50";
 }
 
 function updatePlayPauseIcon(playing) {
@@ -198,6 +205,7 @@ function updateRecommendedSongs() {
 // === MOOD DETECTION ===
 detectMoodBtn.addEventListener('click', async () => {
   const frame = captureFrame();
+  if (!frame) return;
   try {
     const response = await fetch('/detect_mood', {
       method: 'POST',
@@ -236,7 +244,7 @@ function updateMoodUI(data) {
   const mood = data.mood;
   const confidence = Math.round(data.confidence * 100);
   emojiElement.textContent = getEmoji(mood);
-  moodTextElement.textContent = `${capitalize(mood)} & Energetic`;
+  moodTextElement.textContent = `${capitalize(mood)} Mood`;
   confidenceTextElement.textContent = `${confidence}% confidence`;
   document.body.style.background = getMoodColor(mood);
 }
@@ -291,7 +299,7 @@ async function startWebcam() {
 window.addEventListener('DOMContentLoaded', () => {
   startWebcam();
   updatePlayPauseIcon(false);
-  updateSongInfoUI({ title: "No song playing", artist: "", albumArt: "" });
+  updateSongInfoUI({ title: "No song playing", artist: "", thumbnail: "" });
   progress.style.width = "0%";
   progressStart.textContent = "0:00";
   progressEnd.textContent = "0:00";
