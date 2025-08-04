@@ -19,12 +19,20 @@ const volumeLevel = document.querySelector('.volume-level');
 const progressStart = document.querySelector('.progress-bar-container span:first-child');
 const progressEnd = document.querySelector('.progress-bar-container span:last-child');
 const songList = document.querySelector('.song-list');
+const songListTitle = document.getElementById('song-list-title');
+const historyList = document.querySelector('.history-list');
+
+// Webcam elements
+const video = document.getElementById('webcam');
+const webcamStatus = document.getElementById('webcam-status');
+
 
 let playlist = [];
 let currentIndex = 0;
 let isPlaying = false;
 let isShuffle = false;
 let isRepeat = false;
+let currentMood = 'neutral'; // Keep track of the last detected mood
 
 // === PLAYBACK FUNCTIONS ===
 async function playSong(index) {
@@ -33,8 +41,7 @@ async function playSong(index) {
   const song = playlist[currentIndex];
 
   try {
-    // Fetch the direct audio URL for the selected videoId
-    const res = await fetch(`/play/${song.videoId}`);
+    const res = await fetch(`/play/${song.videoId}?song_info=${song.title} - ${song.artist}&mood=${currentMood}`);
     const data = await res.json();
     if (data.audio_url) {
       audioElement.src = data.audio_url;
@@ -43,6 +50,8 @@ async function playSong(index) {
       updateSongInfoUI(song);
       updatePlayPauseIcon(true);
       isPlaying = true;
+      // After playing a new song, refresh the song history
+      fetchSongHistory();
     } else {
       throw new Error("Audio URL not found");
     }
@@ -159,7 +168,9 @@ volumeLevel.style.width = "30%";
 
 // === RECOMMENDATION & UI ===
 async function fetchPlaylist(mood) {
+    currentMood = mood; // Update the current mood
   try {
+    songListTitle.textContent = "Recommended For You"; // Change title
     const res = await fetch('/recommend', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -168,7 +179,7 @@ async function fetchPlaylist(mood) {
     const data = await res.json();
     playlist = data.songs || [];
     if (playlist.length > 0) {
-      updateRecommendedSongs();
+      updateRecommendedSongsUI();
       playSong(0);
     } else {
       alert("No songs found for this mood.");
@@ -179,12 +190,13 @@ async function fetchPlaylist(mood) {
   }
 }
 
-function updateRecommendedSongs() {
+function updateRecommendedSongsUI() {
   songList.innerHTML = '';
   playlist.forEach((song, idx) => {
     const li = document.createElement('li');
     li.innerHTML = `
       <div class="song-info">
+        <img src="${song.thumbnail || 'https://via.placeholder.com/40'}" alt="Album Art" />
         <div>
           <p class="song-title">${song.title}</p>
           <p class="song-artist">${song.artist}</p>
@@ -216,6 +228,7 @@ detectMoodBtn.addEventListener('click', async () => {
     if (data.mood) {
       updateMoodUI(data);
       fetchPlaylist(data.mood);
+      fetchMoodHistory(); // Refresh mood history
     } else {
       alert("Mood not detected. Try again!");
     }
@@ -226,10 +239,9 @@ detectMoodBtn.addEventListener('click', async () => {
 });
 
 function captureFrame() {
-  const video = document.getElementById('webcam');
   if (!video || video.readyState < 2) {
     console.error("❌ Webcam not ready for capture");
-    alert("Webcam is not ready. Please wait a moment.");
+    alert("Webcam is not ready or permission was denied. Please check your browser settings.");
     return null;
   }
   const canvas = document.createElement('canvas');
@@ -249,13 +261,77 @@ function updateMoodUI(data) {
   document.body.style.background = getMoodColor(mood);
 }
 
+// === HISTORY FUNCTIONS ===
+async function fetchMoodHistory() {
+    try {
+        const res = await fetch('/mood_history');
+        const historyData = await res.json();
+        updateMoodHistoryUI(historyData);
+    } catch (err) {
+        console.error("❌ Error fetching mood history:", err);
+    }
+}
+
+function updateMoodHistoryUI(history) {
+    historyList.innerHTML = ''; // Clear existing list
+    if (history.length === 0) {
+        historyList.innerHTML = '<li><p>No mood history yet.</p></li>';
+        return;
+    }
+
+    history.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div class="history-emoji">${getEmoji(item.mood)}</div>
+            <div>
+                <p>${capitalize(item.mood)} Mood</p>
+                <small>${item.detected_at}</small>
+            </div>
+        `;
+        historyList.appendChild(li);
+    });
+}
+
+async function fetchSongHistory() {
+    try {
+        songListTitle.textContent = "Recently Played"; // Set title
+        const res = await fetch('/song_history');
+        const historyData = await res.json();
+        updateSongHistoryUI(historyData);
+    } catch (err) {
+        console.error("❌ Error fetching song history:", err);
+    }
+}
+
+function updateSongHistoryUI(history) {
+    songList.innerHTML = ''; // Clear existing list
+    if (history.length === 0) {
+        songList.innerHTML = '<li><p>No songs played yet.</p></li>';
+        return;
+    }
+
+    history.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div class="song-info">
+                <div>
+                  <p class="song-title">${item.title}</p>
+                  <p class="song-artist">${item.artist}</p>
+                </div>
+            </div>
+            <div class="song-meta">
+                <small>${item.played_at}</small>
+            </div>
+        `;
+        songList.appendChild(li);
+    });
+}
+
+
 function getEmoji(mood) {
   const map = {
-    happy: '😄',
-    sad: '😔',
-    angry: '😡',
-    surprise: '😲',
-    neutral: '😐'
+    happy: '😄', sad: '😔', angry: '😡',
+    surprise: '😲', neutral: '😐', fear: '😨'
   };
   return map[mood] || '🙂';
 }
@@ -284,20 +360,37 @@ function formatTime(sec) {
 
 // === START WEBCAM ===
 async function startWebcam() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    const video = document.getElementById('webcam');
-    video.srcObject = stream;
-    video.onloadedmetadata = () => video.play();
-  } catch (e) {
-    console.error('📷 Webcam access error:', e);
-    alert("Could not access webcam. Check browser permissions.");
-  }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        webcamStatus.innerHTML = "<p>❌ Your browser does not support camera access.</p>";
+        return;
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.style.display = 'block';
+        webcamStatus.style.display = 'none';
+        video.srcObject = stream;
+        video.onloadedmetadata = () => video.play();
+    } catch (err) {
+        console.error("📷 Webcam access error:", err);
+        let errorMessage = "❌ Could not access webcam.";
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+            errorMessage = "❌ Webcam access was denied. Please enable camera permissions in your browser settings.";
+        } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+            errorMessage = "❌ No camera was found on your device.";
+        } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+            errorMessage = "❌ Your camera is already in use by another application.";
+        }
+        webcamStatus.innerHTML = `<p>${errorMessage}</p>`;
+    }
 }
+
 
 // === INIT ===
 window.addEventListener('DOMContentLoaded', () => {
-  startWebcam();
+  startWebcam(); // Start the camera
+  fetchMoodHistory(); // Fetch mood history
+  fetchSongHistory(); // Fetch song history on page load
   updatePlayPauseIcon(false);
   updateSongInfoUI({ title: "No song playing", artist: "", thumbnail: "" });
   progress.style.width = "0%";
