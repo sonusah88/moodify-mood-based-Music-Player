@@ -11,6 +11,9 @@
   --text-muted: #9ca3af;
   --glow-blue: rgba(75, 0, 130, 0.7);
   --glow-purple: rgba(138, 43, 226, 0.7);
+  --neon-blue: rgba(0, 191, 255, 0.9);
+  --neon-purple: rgba(148, 0, 211, 0.9);
+  --neon-pink: rgba(255, 105, 180, 0.9);
   --success-green: #10b981;
   --stat-happiness: #4fd1c5;
   --stat-sadness: #60a5fa;
@@ -51,10 +54,27 @@ body.mood-energetic {
   background: linear-gradient(135deg, #f472b6, #8a2be2);
 }
 
-@keyframes glowing-border {
-  0% { box-shadow: 0 0 15px -5px var(--glow-blue), 0 0 15px -5px var(--glow-blue) inset; }
-  50% { box-shadow: 0 0 15px 0px var(--glow-purple), 0 0 15px -5px var(--glow-purple) inset; }
-  100% { box-shadow: 0 0 15px -5px var(--glow-blue), 0 0 15px -5px var(--glow-blue) inset; }
+@keyframes neon-glow {
+  0% {
+    box-shadow: 0 0 10px 2px var(--neon-blue),
+                0 0 20px 4px var(--neon-blue),
+                0 0 30px 6px var(--neon-blue);
+  }
+  33% {
+    box-shadow: 0 0 10px 2px var(--neon-purple),
+                0 0 20px 4px var(--neon-purple),
+                0 0 30px 6px var(--neon-purple);
+  }
+  66% {
+    box-shadow: 0 0 10px 2px var(--neon-pink),
+                0 0 20px 4px var(--neon-pink),
+                0 0 30px 6px var(--neon-pink);
+  }
+  100% {
+    box-shadow: 0 0 10px 2px var(--neon-blue),
+                0 0 20px 4px var(--neon-blue),
+                0 0 30px 6px var(--neon-blue);
+  }
 }
 
 @keyframes pulse {
@@ -291,7 +311,7 @@ body.mood-energetic {
   padding: 1.5rem;
   border-radius: var(--border-radius-lg);
   margin-bottom: 2rem;
-  animation: glowing-border 4s infinite alternate;
+  animation: neon-glow 3s ease-in-out infinite;
 }
 
 .webcam-section h2 {
@@ -330,7 +350,7 @@ body.mood-energetic {
   background: var(--card-bg);
   padding: 24px;
   border-radius: var(--border-radius-lg);
-  animation: glowing-border 4s infinite alternate;
+  animation: neon-glow 3s ease-in-out infinite;
 }
 
 .profile-icon-wrapper {
@@ -421,7 +441,7 @@ body.mood-energetic {
   border-radius: var(--border-radius-lg);
   max-height: 60vh;
   overflow-y: auto;
-  animation: glowing-border 4s infinite alternate;
+  animation: neon-glow 3s ease-in-out infinite;
 }
 
 .recommended-for-you h2 {
@@ -522,7 +542,7 @@ body.mood-energetic {
   transform: translateX(-50%);
   z-index: 1001;
   gap: 1rem;
-  animation: glowing-border 4s infinite alternate;
+  animation: neon-glow 3s ease-in-out infinite;
 }
 
 .player-song-info {
@@ -781,164 +801,4 @@ body.auth-page {
   align-items: center;
   height: 100vh;
   overflow: hidden;
-}
-
-body.auth-page .container {
-  display: flex;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  max-width: 900px;
-  width: 100%;
-}
-
-body.auth-page .left-panel {
-  flex: 1;
-  background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
-  color: var(--text-primary);
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-body.auth-page .left-panel h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-body.auth-page .left-panel p {
-  font-size: 1.2rem;
-  font-weight: 300;
-  opacity: 0.9;
-}
-
-body.auth-page .left-panel .music-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-  animation: pulse 2s infinite;
-}
-
-body.auth-page .right-panel {
-  flex: 1;
-  padding: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-body.auth-page .right-panel h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-body.auth-page .input-group {
-  margin-bottom: 20px;
-  position: relative;
-}
-
-body.auth-page .input-group label {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 8px;
-}
-
-body.auth-page .input-group input {
-  width: 100%;
-  padding: 12px 40px 12px 16px;
-  border: 1px solid var(--text-secondary);
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-body.auth-page .input-group input:focus {
-  outline: none;
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(75, 0, 130, 0.1);
-}
-
-body.auth-page .input-group i {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-body.auth-page .input-group i:hover {
-  color: var(--primary-blue);
-}
-
-body.auth-page .terms {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-body.auth-page .terms input {
-  accent-color: var(--primary-blue);
-}
-
-body.auth-page .btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple));
-  border: none;
-  border-radius: 8px;
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-body.auth-page .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(75, 0, 130, 0.3);
-}
-
-body.auth-page .login {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-body.auth-page .login a {
-  color: var(--primary-blue);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-body.auth-page .login a:hover {
-  color: var(--light-purple);
-}
-
-@media (max-width: 768px) {
-  body.auth-page .container {
-    flex-direction: column;
-  }
-  body.auth-page .left-panel {
-    padding: 20px;
-  }
-  body.auth-page .right-panel {
-    padding: 20px;
-  }
 }

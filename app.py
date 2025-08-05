@@ -26,9 +26,8 @@ app.config['SECRET_KEY'] = 'a_very_secret_key_that_you_should_change' # IMPORTAN
 db.init_app(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-# This is the most important line for this fix.
+
 # It tells Flask-Login that the 'login' function is the one that handles logins.
-# If a user tries to access a page with @login_required, they are sent here.
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
