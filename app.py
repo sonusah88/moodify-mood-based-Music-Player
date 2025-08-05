@@ -6,12 +6,15 @@ import base64
 from io import BytesIO
 from PIL import Image
 import numpy as np
-from fer import FER
-import random
 from ytmusicapi import YTMusic
 import yt_dlp
 from models import db, User, Song, ListeningHistory, MoodLog
 from datetime import datetime
+import random
+
+# Imports for lightweight mood detection
+import cv2
+from deepface import DeepFace
 
 # Initialize Flask
 app = Flask(__name__)
@@ -36,7 +39,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # --- Initialize Other Components ---
-detector = FER()
 ytmusic = YTMusic()
 
 def get_audio_url(video_id):
@@ -124,19 +126,29 @@ def detect_mood():
         return jsonify({"error": "Invalid image data"}), 400
 
     try:
+        # Decode the base64 image
         header, encoded = img_data.split(",", 1)
         img_bytes = base64.b64decode(encoded)
-        img = Image.open(BytesIO(img_bytes)).convert('RGB')
-        frame = np.array(img)
-        results = detector.detect_emotions(frame)
 
-        if results:
-            top_emotion = max(results[0]['emotions'], key=results[0]['emotions'].get)
-            confidence = results[0]['emotions'][top_emotion]
-        else:
-            top_emotion = "neutral"
-            confidence = 0.5
+        # Convert bytes to a numpy array for deepface
+        nparr = np.frombuffer(img_bytes, np.uint8)
+        img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
+        # Analyze the image for emotion using deepface
+        result = DeepFace.analyze(
+            img_path=img_np,
+            actions=['emotion'],
+            enforce_detection=False, # Don't error if no face is found
+            detector_backend='opencv' # Use the lightweight opencv backend
+        )
+
+        # deepface returns a list of results, we'll take the first one
+        analysis = result[0]
+
+        top_emotion = analysis['dominant_emotion']
+        confidence = analysis['emotion'][top_emotion] / 100.0 # Convert from percentage
+
+        # Log the mood to the database
         mood_log = MoodLog(user_id=current_user.id, mood=top_emotion)
         db.session.add(mood_log)
         db.session.commit()
@@ -144,8 +156,10 @@ def detect_mood():
         return jsonify({"mood": top_emotion, "confidence": confidence})
 
     except Exception as e:
-        print(f"[ERROR] Mood detection failed: {e}")
-        return jsonify({"error": "Mood detection failed"}), 500
+        print(f"[ERROR] Mood detection with deepface failed: {e}")
+        # Return a neutral mood if detection fails
+        return jsonify({"mood": "neutral", "confidence": 0.5})
+
 
 @app.route('/recommend', methods=['POST'])
 @login_required
