@@ -1,29 +1,108 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("[https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap)");
+@import url('[https://fonts.googleapis.com/css2?family=Varela+Round&display=swap](https://fonts.googleapis.com/css2?family=Varela+Round&display=swap)');
 
-:root {
-  --primary-blue: #4b0082;
-  --secondary-blue: #6b7280;
-  --accent-purple: #8a2be2;
-  --light-purple: #a052e8;
-  --card-bg: #2c2845;
-  --text-primary: #ffffff;
-  --text-secondary: #d1d5db;
-  --text-muted: #9ca3af;
-  --glow-blue: rgba(75, 0, 130, 0.7);
-  --glow-purple: rgba(138, 43, 226, 0.7);
-  --neon-blue: rgba(0, 191, 255, 0.9);
-  --neon-purple: rgba(148, 0, 211, 0.9);
-  --neon-pink: rgba(255, 105, 180, 0.9);
-  --success-green: #10b981;
-  --stat-happiness: #4fd1c5;
-  --stat-sadness: #60a5fa;
-  --stat-energy: #f472b6;
-  --border-radius-lg: 16px;
-  --border-radius-md: 12px;
-  --sidebar-width: 260px;
-  --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+.header-title {
+  /* color :yellow; */
+  font-family: 'Varela Round';
+  background: linear-gradient(90deg,
+    rgb(241, 110, 195),
+    #ff0000,
+    antiquewhite,
+    #ffa500,    
+    /* #ffff00,     */
+    #008000,   
+    #0000ff,  
+    #4b0082,   
+    #ee82ee,    
+    #ff0000    
+  );
+  -webkit-background-clip: text; 
+  font-size: 30px;
+  background-clip: text;         
+  color: transparent; 
+  background-size: 400% 100%;
+  /* animation: rgb 5s linear infinite;  */
+  animation: rgb 5s  linear infinite reverse;
 }
 
+@keyframes rgb {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%; 
+  }
+}
+h2.header-title-inner {
+  /* color :yellow; */
+  font-family: 'Varela Round';
+  background: linear-gradient(90deg,
+    #ff0000,  
+    rgb(241, 133, 203) ,
+    /* #ffa500,     */
+    /* #ffff00,     */
+    #008000,   
+    #0000ff,  
+    #4b0082,   
+    #ee82ee,    
+    #ff0000    
+  );
+  -webkit-background-clip: text; 
+  font-size: 30px;
+  background-clip: text;         
+  color: transparent; 
+  background-size: 400% 100%;
+  /* animation: rgb 5s linear infinite;  */
+  animation: rgb 5s  linear infinite reverse;
+}
+
+@keyframes rgb {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%; 
+  }
+}
+:root {
+  --bg-gradient: radial-gradient(ellipse at bottom, #3d1b3b, #12121f);
+  --primary-color: #1e1a33;
+  --secondary-color: #2a2a45; 
+  --card-bg: #2c2845;
+  --text-primary: #ffffff;
+  --text-secondary: #b0aec2;
+  --text-muted-color: #8e8e9e;
+  --accent-purple: #8a2be2;
+  --accent-light-purple: #a052e8;
+  --accent-pink: #f95a73;
+  --accent-orange: #ff8c69;
+  --success-color: #4caf50;
+  --stat-happiness: #4fd1c5;
+  --stat-sadness: #63b3ed;
+  --stat-energy: #f687b3;
+  --icon-color: #5a5575;
+  --border-radius-lg: 16px;
+  --border-radius-md: 12px;
+  --font-family: "Poppins", sans-serif;
+  --sidebar-width: 250px;
+  --glow-color-1: rgba(238, 130, 238, 0.7);
+  --glow-color-2: rgba(255, 0, 0, 0.7);
+}
+body.mood-happy {
+  background: radial-gradient(ellipse at bottom, #ffc371, #ff5f6d);
+}
+
+body.mood-sad {
+  background: radial-gradient(ellipse at bottom, #3a506b, #1c2541);
+}
+
+body.mood-calm {
+  background: radial-gradient(ellipse at bottom, #c1c1c1, #537895);
+}
+
+body.mood-energetic {
+    background: radial-gradient(ellipse at bottom, #ff9a9e, #fad0c4);
+}
 * {
   box-sizing: border-box;
   margin: 0;
@@ -32,137 +111,49 @@
 
 body {
   font-family: var(--font-family);
-  background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+  background: var(--bg-gradient);
   color: var(--text-primary);
+  display: flex;
   min-height: 100vh;
   overflow-x: hidden;
 }
-
-body.mood-happy {
-  background: linear-gradient(135deg, #60a5fa, #4b0082);
+.animated-gradient-text {
+  font-family: 'Varela Round', sans-serif;
+  background: linear-gradient(90deg,
+    #ff0000, #ffa500, #ffff00, #008000,
+    #0000ff, #4b0082, #ee82ee, #ff0000);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 400% 100%;
+  animation: rainbow-sweep 5s linear infinite;
 }
 
-body.mood-sad {
-  background: linear-gradient(135deg, #374151, #1e1a33);
+@keyframes rainbow-sweep {
+  0% { background-position: 0% ; }
+  100% { background-position: 100% ; }
 }
-
-body.mood-calm {
-  background: linear-gradient(135deg, #6b7280, #4b0082);
+@keyframes glowing-border {
+  0% { box-shadow: 0 0 15px -5px var(--glow-color-1), 0 0 15px -5px var(--glow-color-1) inset; }
+  50% { box-shadow: 0 0 15px 0px var(--glow-color-2), 0 0 15px -5px var(--glow-color-2) inset; }
+  100% { box-shadow: 0 0 15px -5px var(--glow-color-1), 0 0 15px -5px var(--glow-color-1) inset; }
 }
-
-body.mood-energetic {
-  background: linear-gradient(135deg, #f472b6, #8a2be2);
-}
-
-@keyframes neon-glow {
+ /* @keyframes glowing-border {
   0% {
-    box-shadow: 0 0 10px 2px var(--neon-blue),
-                0 0 20px 4px var(--neon-blue),
-                0 0 30px 6px var(--neon-blue);
+    box-shadow: 0 0 15px #ff0000, 0 0 15px #ff7f00, 0 0 15px #ffff00;
   }
-  33% {
-    box-shadow: 0 0 10px 2px var(--neon-purple),
-                0 0 20px 4px var(--neon-purple),
-                0 0 30px 6px var(--neon-purple);
+  25% {
+    box-shadow: 0 0 15px #00ff00, 0 0 15px #0000ff,0 0 15px #ff97dc ;
   }
-  66% {
-    box-shadow: 0 0 10px 2px var(--neon-pink),
-                0 0 20px 4px var(--neon-pink),
-                0 0 30px 6px var(--neon-pink);
+  50% {
+    box-shadow: 0 0 15px #0000ff, 0 0 15px #4b0082,0 0 15px #f6ff00;
   }
+  75% {
+    box-shadow: 0 0 15px #4b0082, 0 0 15px #ee82ee,0 0 15px #00ff55;}
   100% {
-    box-shadow: 0 0 10px 2px var(--neon-blue),
-                0 0 20px 4px var(--neon-blue),
-                0 0 30px 6px var(--neon-blue);
+    box-shadow: 0 0 15px #ff0000, 0 0 15px #ff7f00,0 0 15px #f200ff;
   }
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.dj-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, rgba(75, 0, 130, 0.2), rgba(138, 43, 226, 0.2));
-  z-index: -1;
-  opacity: 0.5;
-}
-
-.neon-light {
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(50px);
-  opacity: 0.3;
-  animation: pulse 3s infinite;
-}
-
-.neon-light-1 {
-  width: 300px;
-  height: 300px;
-  background: var(--glow-blue);
-  top: 10%;
-  left: 10%;
-}
-
-.neon-light-2 {
-  width: 400px;
-  height: 400px;
-  background: var(--glow-purple);
-  bottom: 10%;
-  right: 10%;
-}
-
-.dj-turntable {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 100px;
-  height: 100px;
-  z-index: -1;
-}
-
-.turntable-arm {
-  width: 10px;
-  height: 50px;
-  background: var(--text-secondary);
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  transform-origin: top;
-  transform: rotate(20deg);
-  animation: arm-move 4s ease-in-out infinite;
-}
-
-.vinyl {
-  width: 80px;
-  height: 80px;
-  background: radial-gradient(circle, #000 40%, var(--accent-purple) 50%);
-  border-radius: 50%;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-
-.spinning {
-  animation: spin 4s linear infinite;
-}
-
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes arm-move {
-  0% { transform: rotate(20deg); }
-  50% { transform: rotate(30deg); }
-  100% { transform: rotate(20deg); }
-}
-
+} */
 #nav-toggle {
   display: none;
 }
@@ -171,100 +162,81 @@ body.mood-energetic {
   display: flex;
   width: 100%;
 }
-
 .sidebar {
   width: var(--sidebar-width);
-  background: linear-gradient(180deg, var(--primary-blue), var(--secondary-blue));
+  background-color: var(--primary-color);
   padding: 2rem 1.5rem;
+  display: flex;
   flex-direction: column;
   flex-shrink: 0;
   transition: width 0.3s ease, left 0.3s ease;
   z-index: 1000;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--secondary-color);
 }
 
 .sidebar .logo {
   font-size: 1.8rem;
   font-weight: 700;
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
   display: flex;
   align-items: center;
   gap: 12px;
 }
+.sidebar .logo .fa-music { color: var(--accent-purple); }
+.sidebar .logo .Moodify { font-size: 1.6rem; }
 
-.sidebar .logo .fa-music {
-  color: var(--light-purple);
-  animation: pulse 2s infinite;
-}
-
-.sidebar .logo .Moodify {
-  font-size: 1.8rem;
-  background: linear-gradient(90deg, var(--light-purple), var(--text-primary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.sidebar .navigation ul {
-  list-style-type: none;
-}
-
-.sidebar .navigation li {
-  margin-bottom: 1.2rem;
-}
+.sidebar .navigation ul { list-style-type: none; }
+.sidebar .navigation li { margin-bottom: 1.5rem; }
 
 .sidebar .navigation a {
-  color: var(--text-secondary);
+  color: var(--text-muted-color);
   text-decoration: none;
   font-size: 1rem;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px;
+  gap: 15px;
+  padding: 8px 10px;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
 }
 
 .sidebar .navigation a:hover {
   color: var(--text-primary);
-  background: rgba(138, 43, 226, 0.2);
+  background-color: var(--secondary-color);
 }
 
 .sidebar .navigation li.active a {
   color: var(--text-primary);
   font-weight: 600;
-  background: var(--accent-purple);
+  background-color: var(--accent-purple);
+  position: relative;
 }
-
 .main-content {
   flex-grow: 1;
   padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
-  padding-bottom: 140px;
+  padding-bottom: 140px; 
 }
 
 .main-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .header-title {
   font-size: 2rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, var(--light-purple), var(--text-primary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 
 .hamburger-menu {
   display: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: var(--text-primary);
+  z-index: 1002;
 }
 
 .header-actions {
@@ -274,7 +246,7 @@ body.mood-energetic {
 }
 
 .detect-mood-btn {
-  background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple));
+  background: linear-gradient(90deg, var(--accent-purple), var(--accent-light-purple));
   color: var(--text-primary);
   border: none;
   border-radius: 20px;
@@ -298,74 +270,69 @@ body.mood-energetic {
   height: 40px;
   border-radius: 50%;
   cursor: pointer;
-  border: 2px solid var(--light-purple);
+  border: 2px solid var(--text-primary);
   transition: transform 0.2s ease;
 }
-
 .user-avatar:hover {
   transform: scale(1.1);
 }
-
-.webcam-section {
-  background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: var(--border-radius-lg);
-  margin-bottom: 2rem;
-  animation: neon-glow 3s ease-in-out infinite;
-}
-
-.webcam-section h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-#webcam-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#webcam-status p {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-
 .content-area {
-  display: flex;
-  gap: 2rem;
+  flex-grow: 1;
 }
 
 .left-panel {
-  flex: 1;
   display: flex;
-  flex-direction: column;
   gap: 2rem;
+}
+.mood-analysis-container {
+  background-color: var(--primary-color);
+  padding: 24px;
+  border-radius: var(--border-radius-lg);
+  flex-basis: 45%;
+  flex-shrink: 0;
+}
+
+.mood-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.header-icon {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(45deg, var(--accent-pink), var(--accent-orange));
+  border-radius: 8px;
+}
+
+.header-title-inner {
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .mood-content {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 20px;
-  background: var(--card-bg);
-  padding: 24px;
-  border-radius: var(--border-radius-lg);
-  animation: neon-glow 3s ease-in-out infinite;
+  align-items: center;
 }
 
 .profile-icon-wrapper {
-  background: rgba(138, 43, 226, 0.1);
+  background-color: var(--card-bg);
   border-radius: var(--border-radius-lg);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
+  height: 100%;
 }
 
 .dashed-circle {
   width: 150px;
   height: 150px;
-  border: 2px dashed var(--light-purple);
+  border: 2px dashed var(--accent-pink);
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -374,8 +341,7 @@ body.mood-energetic {
 
 .dashed-circle i {
   font-size: 50px;
-  color: var(--light-purple);
-  animation: pulse 2s infinite;
+  color: var(--icon-color);
 }
 
 .mood-details {
@@ -385,26 +351,24 @@ body.mood-energetic {
 }
 
 .main-mood-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--border-radius-md);
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-lg);
   padding: 24px;
   text-align: center;
 }
-
 .main-mood-card .emoji {
   font-size: 40px;
   margin-bottom: 8px;
 }
-
 .main-mood-card .mood-text {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
 }
-
 .main-mood-card .confidence-text {
   font-size: 0.9rem;
   color: var(--text-secondary);
+  font-weight: 400;
 }
 
 .stats-wrapper {
@@ -414,57 +378,50 @@ body.mood-energetic {
 }
 
 .stat-box {
-  background: rgba(255, 255, 255, 0.05);
+  background-color: var(--card-bg);
   border-radius: var(--border-radius-md);
   padding: 16px;
   text-align: center;
 }
-
 .stat-box .stat-label {
+  display: block;
   font-size: 0.85rem;
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
-
-.stat-box .stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
+.stat-box .stat-value { font-size: 1.5rem; font-weight: 700; }
 .stat-box .stat-value.happiness { color: var(--stat-happiness); }
 .stat-box .stat-value.sadness { color: var(--stat-sadness); }
 .stat-box .stat-value.energy { color: var(--stat-energy); }
 
 .recommended-for-you {
-  background: var(--card-bg);
+  background-color: var(--primary-color);
   padding: 1.5rem;
   border-radius: var(--border-radius-lg);
+  flex-grow: 1;
+  animation: glowing-border 4s infinite alternate;
   max-height: 60vh;
+  max-width: 45%;
   overflow-y: auto;
-  animation: neon-glow 3s ease-in-out infinite;
+  overflow-x: auto;
 }
 
 .recommended-for-you h2 {
-  font-size: 1.5rem;
   margin-bottom: 1.5rem;
+  font-size: 1.2rem;
   color: var(--text-primary);
 }
 
-.song-list, .history-list {
-  list-style: none;
-}
+.song-list, .history-list { list-style: none; }
 
 .song-list li {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.8rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--secondary-color);
 }
-
-.song-list li:last-child {
-  border-bottom: none;
-}
+.song-list li:last-child { border-bottom: none; }
 
 .song-info {
   display: flex;
@@ -472,13 +429,7 @@ body.mood-energetic {
   gap: 1rem;
   min-width: 0;
 }
-
-.song-info img {
-  width: 40px;
-  height: 40px;
-  border-radius: 5px;
-}
-
+.song-info img { width: 40px; height: 40px; border-radius: 5px; }
 .song-title {
   font-weight: 600;
   white-space: nowrap;
@@ -486,28 +437,25 @@ body.mood-energetic {
   text-overflow: ellipsis;
   color: var(--text-primary);
 }
-
 .song-artist {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--text-muted-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-meta {
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  color: var(--text-muted);
+  color: var(--text-muted-color);
   flex-shrink: 0;
   font-size: 0.9rem;
 }
-
-.match-rate {
-  color: var(--success-green);
-  font-weight: 600;
-}
-
+.match-rate { color: var(--success-color); font-weight: 600; }
 .play-btn {
-  background: var(--accent-purple);
+  background-color: var(--accent-purple);
   color: var(--text-primary);
   border: none;
   border-radius: 50%;
@@ -517,19 +465,17 @@ body.mood-energetic {
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background 0.3s ease;
+  transition: background-color 0.3s;
 }
+.play-btn:hover { 
+    background-color: var(--accent-light-purple);
+ }
 
-.play-btn:hover {
-  background: var(--light-purple);
-}
 
-.mood-history {
-  display: none;
-}
+.mood-history { display: none; }
 
 .music-player {
-  background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+  background-color: var(--secondary-color);
   width: 50%;
   padding: 1rem 1.5rem;
   border-radius: var(--border-radius-lg);
@@ -542,7 +488,8 @@ body.mood-energetic {
   transform: translateX(-50%);
   z-index: 1001;
   gap: 1rem;
-  animation: neon-glow 3s ease-in-out infinite;
+  animation: glowing-border 4s infinite alternate;
+  transition: all 0.3s ease;
 }
 
 .player-song-info {
@@ -552,12 +499,7 @@ body.mood-energetic {
   flex-basis: 250px;
   min-width: 0;
 }
-
-.player-song-info img {
-  width: 50px;
-  height: 50px;
-  border-radius: 5px;
-}
+.player-song-info img { width: 50px; height: 50px; border-radius: 5px; }
 
 .player-controls {
   flex-grow: 1;
@@ -565,139 +507,99 @@ body.mood-energetic {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
-
 .player-controls .buttons {
   display: flex;
   align-items: center;
   gap: 1.5rem;
   font-size: 1.2rem;
 }
-
 .player-controls .buttons i {
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.2s ease;
+  color: var(--text-muted-color);
+  transition: all 0.2s;
 }
-
-.player-controls .buttons i:hover {
-  color: var(--text-primary);
-  transform: scale(1.1);
-}
+.player-controls .buttons i:hover { color: var(--text-primary); transform: scale(1.1); }
 
 .play-pause-btn {
-  background: var(--accent-purple);
+  background-color: var(--accent-purple);
   color: var(--text-primary);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
+  width: 40px; height: 40px;
+  border-radius: 50%; border: none; cursor: pointer;
   font-size: 1.2rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
-
-.play-pause-btn:hover {
-  background: var(--light-purple);
-  transform: scale(1.1);
-}
+.play-pause-btn:hover { background-color: var(--accent-light-purple); transform: scale(1.1); }
 
 .progress-bar-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  max-width: 500px;
-  color: var(--text-muted);
-  font-size: 0.8rem;
+  display: flex; align-items: center; gap: 1rem;
+  width: 100%; max-width: 500px;
+  color: var(--text-muted-color); font-size: 0.8rem;
 }
-
 .progress-bar {
-  flex-grow: 1;
-  height: 4px;
-  background: var(--text-muted);
-  border-radius: 2px;
-  cursor: pointer;
+  flex-grow: 1; height: 4px;
+  background-color: var(--icon-color);
+  border-radius: 2px; cursor: pointer;
 }
-
 .progress {
   height: 100%;
-  background: var(--light-purple);
+  background-color: var(--text-primary);
   border-radius: 2px;
 }
 
 .player-options {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  display: flex; align-items: center; gap: 1rem;
   flex-basis: 200px;
   justify-content: flex-end;
-  color: var(--text-muted);
+  color: var(--text-muted-color);
 }
-
-.player-options i {
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.player-options i:hover {
-  color: var(--text-primary);
-}
+.player-options i { cursor: pointer; transition: color 0.2s; }
+.player-options i:hover { color: var(--text-primary); }
 
 .volume-bar {
-  width: 100px;
-  height: 4px;
-  background: var(--text-muted);
-  border-radius: 2px;
-  cursor: pointer;
+  width: 100px; height: 4px;
+  background-color: var(--icon-color);
+  border-radius: 2px; cursor: pointer;
 }
-
 .volume-level {
   height: 100%;
-  background: var(--light-purple);
+  background-color: var(--text-primary);
   border-radius: 2px;
 }
 
 @media (max-width: 1366px) {
-  .content-area {
-    flex-direction: column;
-  }
-  .left-panel {
+  .left-panel { flex-direction: column; }
+  .mood-analysis-container, .recommended-for-you {
+    flex-basis: auto;
     width: 100%;
-  }
-  .recommended-for-you {
-    max-width: 100%;
   }
 }
 
 @media (max-width: 1024px) {
-  .main-content {
-    padding: 1.5rem;
-    padding-bottom: 200px;
-  }
-  .header-title {
-    font-size: 1.5rem;
-  }
+  .main-content { padding: 1.5rem; padding-bottom: 200px; }
+  .header-title { display: none; }
+  
   .music-player {
-    width: calc(100% - 2rem);
-    left: 1rem;
+    width: auto;
+    left: 20px;
+    right: 20px;
+    bottom: 15px;
+    gap: 1.5rem;
     transform: none;
   }
-  .player-song-info {
-    flex-basis: 200px;
-  }
-  .player-options {
-    flex-basis: auto;
-  }
-  .volume-bar {
-    display: none;
-  }
+  .player-song-info { flex-basis: 200px; }
+  .player-options { flex-basis: auto; }
+  .volume-bar { display: none; }
 }
 
 @media (max-width: 768px) {
+  body {
+    display: block; 
+  }
   .sidebar {
     position: fixed;
     left: calc(-1 * var(--sidebar-width));
@@ -711,70 +613,48 @@ body.mood-energetic {
     filter: brightness(0.5);
     pointer-events: none;
   }
+  
   .main-content {
+    width: 100%;
     padding: 1rem;
     padding-bottom: 220px;
   }
+
   .hamburger-menu {
     display: block;
   }
-  .detect-mood-btn .btn-text {
-    display: none;
+  .main-header {
+    width: 100%;
   }
-  .detect-mood-btn {
-    padding: 0.6rem;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-  }
+  .detect-mood-btn .btn-text { display: none; }
+  .detect-mood-btn { padding: 0.6rem; border-radius: 50%; width: 40px; height: 40px;}
+
   .mood-content {
     grid-template-columns: 1fr;
   }
-  .profile-icon-wrapper {
-    padding: 40px 20px;
-  }
-  .song-meta .match-rate,
-  .song-meta span:first-child {
-    display: none;
-  }
+  .profile-icon-wrapper { min-height: auto; padding: 40px 20px; }
+  .song-meta .match-rate, .song-meta span:first-child { display: none; }
+
   .music-player {
     flex-direction: column;
+    height: auto;
+    padding: 1rem;
+    align-items: center;
     width: calc(100% - 2rem);
     left: 1rem;
     bottom: 1rem;
+    transform: none; 
   }
-  .player-song-info {
-    order: 2;
-    width: 100%;
-    justify-content: center;
-    text-align: center;
-    margin-top: 1rem;
-  }
-  .player-controls {
-    order: 1;
-    width: 100%;
-  }
-  .player-options {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    margin-top: 1rem;
-  }
-  .volume-bar {
-    display: block;
-  }
+  .player-song-info { order: 2; width: 100%; justify-content: center; text-align: center; margin-top: 1rem; }
+  .player-controls { order: 1; width: 100%; }
+  .player-options { order: 3; width: 100%; justify-content: center; margin-top: 1rem; }
+  .volume-bar { display: block; }
 }
 
 @media (max-width: 480px) {
-  :root {
-    --sidebar-width: 220px;
-  }
-  .header-actions {
-    gap: 0.8rem;
-  }
-  .stats-wrapper {
-    grid-template-columns: 1fr;
-  }
+  :root { --sidebar-width: 220px; }
+  .header-actions { gap: 0.8rem; }
+  .stats-wrapper { grid-template-columns: 1fr; }
   .song-list li {
     flex-direction: column;
     align-items: flex-start;
@@ -784,21 +664,42 @@ body.mood-energetic {
     width: 100%;
     justify-content: flex-end;
   }
-  .song-meta .match-rate,
-  .song-meta span:first-child {
-    display: inline-block;
+  .song-meta .match-rate, .song-meta span:first-child {
+    display: inline-block; 
   }
   .player-song-info .song-artist {
     font-size: 0.75rem;
   }
 }
+  span.Moodify {
+    font-family: 'Varela Round';
+  background: linear-gradient(90deg,
+    #ff0000,   
+    /* #ffa500, */
+    rgb(238, 101, 188) ,   
+    /* #ffff00,     */
+    #008000,   
+    purple,  
+    #4b0082,   
+    #ee82ee,    
+    #ff0000    
+  );
+  -webkit-background-clip: text; 
+  /* font-size: 30px; */
+  /* font-size: 2rem; */
+  background-clip: text;         
+  color: transparent; 
+  background-size: 400% 100%;
+   animation: rgb 5s  linear infinite alternate-reverse; 
+   /* animation: 0.5s linear 1s infinite alternate slide-in; */
+   /* animation: name duration timing-function delay iteration-count direction fill-mode; */
+}
 
-/* Login/Registration Page Styles */
-body.auth-page {
-  background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  overflow: hidden;
+@keyframes rgb {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%; 
+  }
 }
